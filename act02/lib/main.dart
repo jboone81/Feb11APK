@@ -23,7 +23,7 @@ class ValentineHome extends StatefulWidget {
 }
 
 class _ValentineHomeState extends State<ValentineHome> {
-  final List<String> emojiOptions = ['Sweet Heart', 'Party Heart'];
+  final List<String> emojiOptions = ['Sweet Heart', 'Party Heart', 'Black Cupid', 'Golden Love'];
   String selectedEmoji = 'Sweet Heart';
 
   @override
@@ -60,6 +60,7 @@ class HeartEmojiPainter extends CustomPainter {
   HeartEmojiPainter({required this.type});
   final String type;
 
+
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
@@ -85,28 +86,47 @@ class HeartEmojiPainter extends CustomPainter {
         center.dy + 60,
       )
       ..close();
+    
+    // GOLD GRADIENT SUPPORT
+      if (type == 'Golden Love') {
+        final rect = Rect.fromCenter(
+          center: center,
+          width: 220,
+          height: 220,
+        );
 
-    paint.color = type == 'Party Heart'
-        ? const Color(0xFFF48FB1)
-        : const Color(0xFFE91E63);
-    canvas.drawPath(heartPath, paint);
+        final goldPaint = Paint()
+          ..shader = const LinearGradient(
+            colors: [
+              Color(0xFFFFF8E1), // highlight
+              Color(0xFFFFD700), // gold
+              Color(0xFFFFA000), // deep gold
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ).createShader(rect);
 
-    // Face features (starter)
-    final eyePaint = Paint()..color = Colors.white;
-    canvas.drawCircle(Offset(center.dx - 30, center.dy - 10), 10, eyePaint);
-    canvas.drawCircle(Offset(center.dx + 30, center.dy - 10), 10, eyePaint);
+        canvas.drawPath(heartPath, goldPaint);
 
-    final mouthPaint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4;
-    canvas.drawArc(
-      Rect.fromCircle(center: Offset(center.dx, center.dy + 20), radius: 30),
-      0,
-      3.14,
-      false,
-      mouthPaint,
-    );
+        // ✨ Shine highlight
+        final shinePaint = Paint()
+          ..color = Colors.white.withOpacity(0.25);
+
+        canvas.drawCircle(
+          Offset(center.dx - 40, center.dy - 60),
+          25,
+          shinePaint,
+        );
+      } else {
+        paint.color = switch (type) {
+          'Sweet Heart' => const Color(0xFFE91E63),
+          'Party Heart' => const Color(0xFFF48FB1),
+          'Black Cupid' => const Color(0xFF000000),
+          _ => const Color(0xFFE91E63),
+        };
+
+        canvas.drawPath(heartPath, paint);
+      }
 
     // Party hat placeholder (expand for confetti)
     if (type == 'Party Heart') {
@@ -118,8 +138,23 @@ class HeartEmojiPainter extends CustomPainter {
         ..close();
       canvas.drawPath(hatPath, hatPaint);
     }
-  }
+  
+    if (type == 'Black Cupid') {
+      final wingPaint = Paint()..color = Colors.grey.shade800;
 
+      // Left wing
+      final leftWing = Path()
+        ..moveTo(center.dx - 60, center.dy - 20)
+        ..quadraticBezierTo(center.dx - 100, center.dy - 80, center.dx - 60, center.dy - 60);
+      canvas.drawPath(leftWing, wingPaint);
+
+      // Right wing
+      final rightWing = Path()
+        ..moveTo(center.dx + 60, center.dy - 20)
+        ..quadraticBezierTo(center.dx + 100, center.dy - 80, center.dx + 60, center.dy - 60);
+      canvas.drawPath(rightWing, wingPaint);
+    }
+  }
   @override
   bool shouldRepaint(covariant HeartEmojiPainter oldDelegate) =>
       oldDelegate.type != type;
